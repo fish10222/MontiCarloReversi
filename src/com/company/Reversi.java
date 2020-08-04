@@ -3,6 +3,7 @@ package com.company;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.awt.Point;
+import java.lang.Math;
 
 public class Reversi {
 
@@ -32,7 +33,33 @@ public class Reversi {
         return game_Board[y][x];
     }
 
+    public int whoWon(){
+        if (human_Score == CPU_Score){
+            return 0;
+        }
+        else if (human_Score > CPU_Score){
+            return 1;
+        }
+        else{
+            return 2;
+        }
+    }
 
+    public int[] scores(){
+        int[] score = new int[2];
+        score[0] = human_Score;
+        score[1] = CPU_Score;
+        return score;
+    }
+
+    public void forceSkipMove() {
+        if (current_Move == 1){
+            current_Move = 2;
+        }
+        else {
+            current_Move = 1;
+        }
+    }
 
     public boolean makeMove(int y, int x) {
         // Board location occupied
@@ -51,12 +78,7 @@ public class Reversi {
         updateScore();
 
         // Flip who's move it is.
-        if (current_Move == 1){
-            current_Move = 2;
-        }
-        else {
-            current_Move = 1;
-        }
+        forceSkipMove();
         return true;
     }
 
@@ -242,7 +264,6 @@ public class Reversi {
 
     public ArrayList<Point> validMoves(){
         int target = 0;
-        int[] newMove = {0,0};
         // Human Move
         if (current_Move == 1) {
             target = 2;

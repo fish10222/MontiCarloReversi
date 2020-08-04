@@ -14,10 +14,18 @@ public class Main {
         game.newGame(1);
         Scanner input = new Scanner(System.in);
         int[] move = {0, 0};
-        boolean acceptedMove = false;
+        boolean acceptedMove;
         ArrayList<Point> availableMoves = game.validMoves();
         Point nextMove = new Point(0,0);
-        while(!availableMoves.isEmpty()){
+        boolean skippedMove = false;
+        while(!availableMoves.isEmpty() || !skippedMove){
+            if (availableMoves.isEmpty()){
+                if (skippedMove) {
+                    break;
+                }
+                System.out.println("No move available! Skipping turn.");
+                game.forceSkipMove();
+            }
             acceptedMove = false;
             printBoard(game);
             System.out.println("Please type the Y Coordinate of your next move");
@@ -33,6 +41,7 @@ public class Main {
             nextMove.setLocation(move[1], move[0]);
             for (final Point validMove : availableMoves){
                 if(nextMove.equals(validMove)){
+                    skippedMove = false;
                     game.makeMove(move[0], move[1]);
                     availableMoves = game.validMoves();
                     acceptedMove = true;
@@ -43,6 +52,10 @@ public class Main {
                 System.out.println("Invalid move");
             }
         }
+        System.out.println("==========");
+        System.out.println("Game Over!");
+        System.out.println("==========");
+        checkWinner(game);
     }
 
     public static void printBoard(Reversi game){
@@ -67,5 +80,24 @@ public class Main {
             System.out.println("");
             System.out.println("   -------------------------------");
         }
+    }
+
+    public static void checkWinner(Reversi game){
+        int winner = game.whoWon();
+        int[] scores = game.scores();
+        if (winner == 0){
+            System.out.println("It's a tie!");
+        }
+        else if (winner == 1) {
+            System.out.println("Human has won!");
+        }
+        else {
+            System.out.println("CPU has won!");
+        }
+        System.out.println("===========");
+        System.out.println("Final Score");
+        System.out.println("===========");
+        System.out.println("Human: " + scores[0]);
+        System.out.println("CPU: " + scores[1]);
     }
 }
