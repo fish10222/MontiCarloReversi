@@ -4,6 +4,7 @@ import com.company.Reversi;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.awt.Point;
 
 public class Main {
 
@@ -14,7 +15,8 @@ public class Main {
         Scanner input = new Scanner(System.in);
         int[] move = {0, 0};
         boolean acceptedMove = false;
-        ArrayList<int[]> availableMoves = game.validMoves();
+        ArrayList<Point> availableMoves = game.validMoves();
+        Point nextMove = new Point(0,0);
         while(!availableMoves.isEmpty()){
             acceptedMove = false;
             printBoard(game);
@@ -28,8 +30,9 @@ public class Main {
             if (number >= 0 && number < 8){
                 move[1]=number;
             }
-            for (final int[] validMove : availableMoves){
-                if(Arrays.equals(validMove, move)){
+            nextMove.setLocation(move[1], move[0]);
+            for (final Point validMove : availableMoves){
+                if(nextMove.equals(validMove)){
                     game.makeMove(move[0], move[1]);
                     availableMoves = game.validMoves();
                     acceptedMove = true;

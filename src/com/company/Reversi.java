@@ -2,6 +2,7 @@ package com.company;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.awt.Point;
 
 public class Reversi {
 
@@ -68,34 +69,39 @@ public class Reversi {
         boolean L_stop = false;
 
         // Check in horizontal direction ( - )
-        for (int n = 1; n < board_length; n++){
+        for (int n = 1; n < board_length; n++) {
             // Scan towards left side
-            if (x - n >= 0 && !L_stop){
+            if (x - n >= 0 && !L_stop) {
                 // Will trigger at the first same piece found.
-                if (game_Board[y][x-n] == target){
-                    distance_L = n-1;
+                if (game_Board[y][x - n] == target) {
+                    distance_L = n - 1;
                     L_stop = true;
                 }
                 // Space note occupied yet.
-                else if(game_Board[y][x-n] == 0){
+                else if (game_Board[y][x - n] == 0) {
+                    L_stop = true;
+                } else {
                     L_stop = true;
                 }
             }
             // Scan towards Right side
-            if (x + n <= board_length && !R_stop){
+            if (x + n < board_length && !R_stop) {
                 // Will trigger at the first same piece found.
-                if (game_Board[y][x+n] == target){
-                    distance_R = n-1;
+                if (game_Board[y][x + n] == target) {
+                    distance_R = n - 1;
                     R_stop = true;
                 }
                 // Space note occupied yet.
-                else if(game_Board[y][x+n] == 0){
+                else if (game_Board[y][x + n] == 0) {
+                    R_stop = true;
+                } else {
                     R_stop = true;
                 }
-            }
-            // Terminate early condition.
-            if (L_stop && R_stop){
-                break;
+
+                // Terminate early condition.
+                if (L_stop && R_stop) {
+                    break;
+                }
             }
         }
         // Change captured pieces.
@@ -114,19 +120,20 @@ public class Reversi {
         // Check in Vertical direction ( | )
         for (int n = 1; n < board_length; n++){
             // Scan towards left side
-            if (y - n >= 0 && !L_stop){
-                // Will trigger at the first same piece found.
-                if (game_Board[y-n][x] == target){
-                    distance_L = n-1;
-                    L_stop = true;
+                if (y - n >= 0 && !L_stop){
+                    // Will trigger at the first same piece found.
+                    if ( y - n >= 0)
+                        if (game_Board[y-n][x] == target){
+                            distance_L = n-1;
+                            L_stop = true;
+                        }
+                        // Space note occupied yet.
+                        else if(game_Board[y-n][x] == 0){
+                            L_stop = true;
+                        }
                 }
-                // Space note occupied yet.
-                else if(game_Board[y-n][x] == 0){
-                    L_stop = true;
-                }
-            }
             // Scan towards Right side
-            if (y + n <= board_length && !R_stop){
+            if (y + n < board_length && !R_stop){
                 // Will trigger at the first same piece found.
                 if (game_Board[y+n][x] == target){
                     distance_R = n-1;
@@ -158,7 +165,7 @@ public class Reversi {
         // Check in / diagonal
         for (int n = 1; n < board_length; n++){
             // Scan towards left side
-            if (y + n <= board_length && x - n >= 0 && !L_stop){
+            if (y + n < board_length && x - n >= 0 && !L_stop){
                 // Will trigger at the first same piece found.
                 if (game_Board[y+n][x-n] == target){
                     distance_L = n-1;
@@ -170,7 +177,7 @@ public class Reversi {
                 }
             }
             // Scan towards Right side
-            if (y - n >= 0  && x + n <= board_length && !R_stop){
+            if (y - n >= 0  && x + n < board_length && !R_stop){
                 // Will trigger at the first same piece found.
                 if (game_Board[y-n][x+n] == target){
                     distance_R = n-1;
@@ -214,7 +221,7 @@ public class Reversi {
                 }
             }
             // Scan towards Right side
-            if (y + n <= board_length  && x + n <= board_length && !R_stop){
+            if (y + n < board_length  && x + n < board_length && !R_stop){
                 // Will trigger at the first same piece found.
                 if (game_Board[y+n][x+n] == target){
                     distance_R = n-1;
@@ -238,7 +245,7 @@ public class Reversi {
         }
     }
 
-    public ArrayList<int[]> validMoves(){
+    public ArrayList<Point> validMoves(){
         int target = 0;
         int[] newMove = {0,0};
         // Human Move
@@ -250,7 +257,7 @@ public class Reversi {
         }
         // List of moves are in the form of their coordinates.
         // Ex. [1,4], [3,4]
-        ArrayList<int[]> moves = new ArrayList<int[]>();
+        ArrayList<Point> moves = new ArrayList<Point>();
 
         for (int y = 0; y < board_length; y++) {
             for (int x = 0; x < board_length; x++) {
@@ -263,9 +270,7 @@ public class Reversi {
                                 // If next piece to left is target, continue moving to the left
                                 continue;
                             } else if (game_Board[y][n] == current_Move) {
-                                newMove[0] = y;
-                                newMove[1] = x+1;
-                                moves.add(newMove);
+                                moves.add(new Point(x+1,y));
                             } else {
                                 break;
                             }
@@ -273,14 +278,12 @@ public class Reversi {
                     }
                     // Check piece to Left
                     if (game_Board[y][x - 1] == 0) {
-                        for (int n = x + 1; n <= board_length; n++) {
+                        for (int n = x + 1; n < board_length; n++) {
                             if (game_Board[y][n] == target) {
                                 // If next piece to left is target, continue moving to the left
                                 continue;
                             } else if (game_Board[y][n] == current_Move) {
-                                newMove[0] = y;
-                                newMove[1] = x-1;
-                                moves.add(newMove);
+                                moves.add(new Point(x-1,y));
                             } else {
                                 break;
                             }
@@ -289,14 +292,12 @@ public class Reversi {
 
                     // Check piece Above.
                     if (game_Board[y - 1][x] == 0) {
-                        for (int n = y + 1; n <= board_length; n++) {
+                        for (int n = y + 1; n < board_length; n++) {
                             if (game_Board[n][x] == target) {
                                 // If next piece to left is target, continue moving to the left
                                 continue;
                             } else if (game_Board[n][x] == current_Move) {
-                                newMove[0] = y-1;
-                                newMove[1] = x;
-                                moves.add(newMove);
+                                moves.add(new Point(x,y-1));
                             } else {
                                 break;
                             }
@@ -310,9 +311,7 @@ public class Reversi {
                                 // If next piece to left is target, continue moving to the left
                                 continue;
                             } else if (game_Board[n][x] == current_Move) {
-                                newMove[0] = y+1;
-                                newMove[1] = x;
-                                moves.add(newMove);
+                                moves.add(new Point(x,y+1));
                             } else {
                                 break;
                             }
@@ -323,16 +322,14 @@ public class Reversi {
                     if (game_Board[y - 1][x + 1] == 0) {
                         int n = y + 1;
                         int m = x - 1;
-                        while (n <= board_length && m >= 0) {
+                        while (n < board_length && m >= 0) {
                             if (game_Board[n][m] == target) {
                                 // If next piece to left is target, continue moving to the left
                                 n++;
                                 m--;
                                 continue;
                             } else if (game_Board[n][m] == current_Move) {
-                                newMove[0] = y-1;
-                                newMove[1] = x+1;
-                                moves.add(newMove);
+                                moves.add(new Point(x+1,y-1));
                             } else {
                                 break;
                             }
@@ -342,16 +339,14 @@ public class Reversi {
                     if (game_Board[y - 1][x - 1] == 0) {
                         int n = y + 1;
                         int m = x + 1;
-                        while (n <= board_length && m <= board_length) {
+                        while (n < board_length && m < board_length) {
                             if (game_Board[n][m] == target) {
                                 // If next piece to left is target, continue moving to the left
                                 n++;
                                 m++;
                                 continue;
                             } else if (game_Board[n][m] == current_Move) {
-                                newMove[0] = y-1;
-                                newMove[1] = x-1;
-                                moves.add(newMove);
+                                moves.add(new Point(x-1,y-1));
                             } else {
                                 break;
                             }
@@ -369,9 +364,7 @@ public class Reversi {
                                 m--;
                                 continue;
                             } else if (game_Board[n][m] == current_Move) {
-                                newMove[0] = y+1;
-                                newMove[1] = x+1;
-                                moves.add(newMove);
+                                moves.add(new Point(x+1,y+1));
                             } else {
                                 break;
                             }
@@ -381,16 +374,14 @@ public class Reversi {
                     if (game_Board[y + 1][x - 1] == 0) {
                         int n = y - 1;
                         int m = x + 1;
-                        while (n >= 0 && m <= board_length) {
+                        while (n >= 0 && m < board_length) {
                             if (game_Board[n][m] == target) {
                                 // If next piece to left is target, continue moving to the left
                                 n--;
                                 m++;
                                 continue;
                             } else if (game_Board[n][m] == current_Move) {
-                                newMove[0] = y+1;
-                                newMove[1] = x-1;
-                                moves.add(newMove);
+                                moves.add(new Point(x-1,y+1));
                             } else {
                                 break;
                             }
