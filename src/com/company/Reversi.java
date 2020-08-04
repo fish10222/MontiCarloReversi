@@ -36,7 +36,7 @@ public class Reversi {
 
     public boolean makeMove(int y, int x) {
         // Board location occupied
-        if (game_Board[x][y] != 0){
+        if (game_Board[y][x] != 0){
             return false;
         }
         // If the player is currently a human
@@ -80,8 +80,6 @@ public class Reversi {
                 // Space note occupied yet.
                 else if (game_Board[y][x - n] == 0) {
                     L_stop = true;
-                } else {
-                    L_stop = true;
                 }
             }
             // Scan towards Right side
@@ -94,10 +92,7 @@ public class Reversi {
                 // Space note occupied yet.
                 else if (game_Board[y][x + n] == 0) {
                     R_stop = true;
-                } else {
-                    R_stop = true;
                 }
-
                 // Terminate early condition.
                 if (L_stop && R_stop) {
                     break;
@@ -120,17 +115,17 @@ public class Reversi {
         // Check in Vertical direction ( | )
         for (int n = 1; n < board_length; n++){
             // Scan towards left side
-                if (y - n >= 0 && !L_stop){
-                    // Will trigger at the first same piece found.
-                    if ( y - n >= 0)
-                        if (game_Board[y-n][x] == target){
-                            distance_L = n-1;
-                            L_stop = true;
-                        }
-                        // Space note occupied yet.
-                        else if(game_Board[y-n][x] == 0){
-                            L_stop = true;
-                        }
+            if (y - n >= 0 && !L_stop){
+                // Will trigger at the first same piece found.
+                if ( y - n >= 0)
+                    if (game_Board[y-n][x] == target){
+                        distance_L = n-1;
+                        L_stop = true;
+                    }
+                    // Space note occupied yet.
+                    else if(game_Board[y-n][x] == 0){
+                        L_stop = true;
+                    }
                 }
             // Scan towards Right side
             if (y + n < board_length && !R_stop){
@@ -264,126 +259,146 @@ public class Reversi {
                 if (game_Board[y][x] == target) {
                     // Check piece to right
                     // If empty, check to see if the left if there is a series of target pieces terminating with one of current player
-                    if (game_Board[y][x + 1] == 0) {
-                        for (int n = x - 1; n >= 0; n--) {
-                            if (game_Board[y][n] == target) {
-                                // If next piece to left is target, continue moving to the left
-                                continue;
-                            } else if (game_Board[y][n] == current_Move) {
-                                moves.add(new Point(x+1,y));
-                            } else {
-                                break;
+                    if ( x + 1 < board_length) {
+                        if (game_Board[y][x + 1] == 0) {
+                            for (int n = x - 1; n >= 0; n--) {
+                                if (game_Board[y][n] == target) {
+                                    // If next piece to left is target, continue moving to the left
+                                    continue;
+                                } else if (game_Board[y][n] == current_Move) {
+                                    moves.add(new Point(x + 1, y));
+                                    break;
+                                } else {
+                                    break;
+                                }
                             }
                         }
                     }
-                    // Check piece to Left
-                    if (game_Board[y][x - 1] == 0) {
-                        for (int n = x + 1; n < board_length; n++) {
-                            if (game_Board[y][n] == target) {
-                                // If next piece to left is target, continue moving to the left
-                                continue;
-                            } else if (game_Board[y][n] == current_Move) {
-                                moves.add(new Point(x-1,y));
-                            } else {
-                                break;
+                    if (x - 1 >= 0 ) {
+                        // Check piece to Left
+                        if (game_Board[y][x - 1] == 0) {
+                            for (int n = x + 1; n < board_length; n++) {
+                                if (game_Board[y][n] == target) {
+                                    // If next piece to left is target, continue moving to the left
+                                    continue;
+                                } else if (game_Board[y][n] == current_Move) {
+                                    moves.add(new Point(x - 1, y));
+                                    break;
+                                } else {
+                                    break;
+                                }
                             }
                         }
                     }
-
                     // Check piece Above.
-                    if (game_Board[y - 1][x] == 0) {
-                        for (int n = y + 1; n < board_length; n++) {
-                            if (game_Board[n][x] == target) {
-                                // If next piece to left is target, continue moving to the left
-                                continue;
-                            } else if (game_Board[n][x] == current_Move) {
-                                moves.add(new Point(x,y-1));
-                            } else {
-                                break;
+                    if (y - 1 >= 0) {
+                        if (game_Board[y - 1][x] == 0) {
+                            for (int n = y + 1; n < board_length; n++) {
+                                if (game_Board[n][x] == target) {
+                                    // If next piece to left is target, continue moving to the left
+                                    continue;
+                                } else if (game_Board[n][x] == current_Move) {
+                                    moves.add(new Point(x, y - 1));
+                                    break;
+                                } else {
+                                    break;
+                                }
                             }
                         }
                     }
-
                     // Check piece Below.
-                    if (game_Board[y + 1][x] == 0) {
-                        for (int n = y - 1; n >= 0; n--) {
-                            if (game_Board[n][x] == target) {
-                                // If next piece to left is target, continue moving to the left
-                                continue;
-                            } else if (game_Board[n][x] == current_Move) {
-                                moves.add(new Point(x,y+1));
-                            } else {
-                                break;
+                    if (y + 1 < board_length) {
+                        if (game_Board[y + 1][x] == 0) {
+                            for (int n = y - 1; n >= 0; n--) {
+                                if (game_Board[n][x] == target) {
+                                    // If next piece to left is target, continue moving to the left
+                                    continue;
+                                } else if (game_Board[n][x] == current_Move) {
+                                    moves.add(new Point(x, y + 1));
+                                    break;
+                                } else {
+                                    break;
+                                }
                             }
                         }
                     }
-
                     // Check top right.
-                    if (game_Board[y - 1][x + 1] == 0) {
-                        int n = y + 1;
-                        int m = x - 1;
-                        while (n < board_length && m >= 0) {
-                            if (game_Board[n][m] == target) {
-                                // If next piece to left is target, continue moving to the left
-                                n++;
-                                m--;
-                                continue;
-                            } else if (game_Board[n][m] == current_Move) {
-                                moves.add(new Point(x+1,y-1));
-                            } else {
-                                break;
+                    if (y - 1 >= 0 && x + 1 < board_length) {
+                        if (game_Board[y - 1][x + 1] == 0) {
+                            int n = y + 1;
+                            int m = x - 1;
+                            while (n < board_length && m >= 0) {
+                                if (game_Board[n][m] == target) {
+                                    // If next piece to left is target, continue moving to the left
+                                    n++;
+                                    m--;
+                                    continue;
+                                } else if (game_Board[n][m] == current_Move) {
+                                    moves.add(new Point(x + 1, y - 1));
+                                    break;
+                                } else {
+                                    break;
+                                }
                             }
                         }
                     }
                     // Check top Left.
-                    if (game_Board[y - 1][x - 1] == 0) {
-                        int n = y + 1;
-                        int m = x + 1;
-                        while (n < board_length && m < board_length) {
-                            if (game_Board[n][m] == target) {
-                                // If next piece to left is target, continue moving to the left
-                                n++;
-                                m++;
-                                continue;
-                            } else if (game_Board[n][m] == current_Move) {
-                                moves.add(new Point(x-1,y-1));
-                            } else {
-                                break;
+                    if (y - 1 >= 0 && x - 1 >= 0 ) {
+                        if (game_Board[y - 1][x - 1] == 0) {
+                            int n = y + 1;
+                            int m = x + 1;
+                            while (n < board_length && m < board_length) {
+                                if (game_Board[n][m] == target) {
+                                    // If next piece to left is target, continue moving to the left
+                                    n++;
+                                    m++;
+                                    continue;
+                                } else if (game_Board[n][m] == current_Move) {
+                                    moves.add(new Point(x - 1, y - 1));
+                                    break;
+                                } else {
+                                    break;
+                                }
                             }
                         }
                     }
-
                     // Check bottom Right
-                    if (game_Board[y + 1][x + 1] == 0) {
-                        int n = y - 1;
-                        int m = x - 1;
-                        while (n >= 0 && m >= 0) {
-                            if (game_Board[n][m] == target) {
-                                // If next piece to left is target, continue moving to the left
-                                n--;
-                                m--;
-                                continue;
-                            } else if (game_Board[n][m] == current_Move) {
-                                moves.add(new Point(x+1,y+1));
-                            } else {
-                                break;
+                    if (y + 1 < board_length && x + 1 < board_length) {
+                        if (game_Board[y + 1][x + 1] == 0) {
+                            int n = y - 1;
+                            int m = x - 1;
+                            while (n >= 0 && m >= 0) {
+                                if (game_Board[n][m] == target) {
+                                    // If next piece to left is target, continue moving to the left
+                                    n--;
+                                    m--;
+                                    continue;
+                                } else if (game_Board[n][m] == current_Move) {
+                                    moves.add(new Point(x + 1, y + 1));
+                                    break;
+                                } else {
+                                    break;
+                                }
                             }
                         }
                     }
                     // Check Bottom Left.
-                    if (game_Board[y + 1][x - 1] == 0) {
-                        int n = y - 1;
-                        int m = x + 1;
-                        while (n >= 0 && m < board_length) {
-                            if (game_Board[n][m] == target) {
-                                // If next piece to left is target, continue moving to the left
-                                n--;
-                                m++;
-                                continue;
-                            } else if (game_Board[n][m] == current_Move) {
-                                moves.add(new Point(x-1,y+1));
-                            } else {
-                                break;
+                    if (y + 1 < board_length && x - 1 >= 0) {
+                        if (game_Board[y + 1][x - 1] == 0) {
+                            int n = y - 1;
+                            int m = x + 1;
+                            while (n >= 0 && m < board_length) {
+                                if (game_Board[n][m] == target) {
+                                    // If next piece to left is target, continue moving to the left
+                                    n--;
+                                    m++;
+                                    continue;
+                                } else if (game_Board[n][m] == current_Move) {
+                                    moves.add(new Point(x - 1, y + 1));
+                                    break;
+                                } else {
+                                    break;
+                                }
                             }
                         }
                     }
