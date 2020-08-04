@@ -61,6 +61,10 @@ public class Reversi {
         }
     }
 
+    public int whosTurn(){
+        return current_Move;
+    }
+
     public boolean makeMove(int y, int x) {
         // Board location occupied
         if (game_Board[y][x] != 0){

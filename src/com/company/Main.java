@@ -18,13 +18,15 @@ public class Main {
         ArrayList<Point> availableMoves = game.validMoves();
         Point nextMove = new Point(0,0);
         boolean skippedMove = false;
-        while(!availableMoves.isEmpty() || !skippedMove){
+        while(true){
+            whosTurn(game);
             if (availableMoves.isEmpty()){
                 if (skippedMove) {
                     break;
                 }
                 System.out.println("No move available! Skipping turn.");
                 game.forceSkipMove();
+                skippedMove = true;
             }
             acceptedMove = false;
             printBoard(game);
@@ -99,5 +101,14 @@ public class Main {
         System.out.println("===========");
         System.out.println("Human: " + scores[0]);
         System.out.println("CPU: " + scores[1]);
+    }
+
+    public static void whosTurn(Reversi game){
+        if (game.current_Move == 1){
+            System.out.println("Human move");
+        }
+        else {
+            System.out.println("CPU move");
+        }
     }
 }
