@@ -9,25 +9,42 @@ public class Reversi {
 
     // Human is 1 on board.
     // CPU is 2 on board.
-    private int[][] game_Board = new int[4][4];
+    private int[][] game_Board;
 
     private int human_Score = 0;
     private int CPU_Score = 0;
 
     public int current_Move = 0;
-    private final int board_length = 4;
+    private final int board_length = 8;
 
-    public void newGame(int first_Player){
-        // Set who has the first move
-        current_Move = first_Player;
+    // Constructor
+    public Reversi(){
+        game_Board = new int[board_length][board_length];
+    }
+
+    // Copy constructor
+    public Reversi(Reversi original){
+        // Deep copy of Game Board
+        game_Board = new int[board_length][board_length];
+        for (int y = 0; y < board_length; y++){
+            for (int x = 0; x < board_length; x++){
+                game_Board[y][x] = original.game_Board[y][x];
+            }
+        }
+        current_Move = original.current_Move;
+    }
+
+    public void newGame(){
+        current_Move = 1;
         for (int[] row: game_Board){
             Arrays.fill(row, 0);
         }
-        game_Board[1][1] = 1;
-        game_Board[1][2] = 2;
-        game_Board[2][1] = 2;
-        game_Board[2][2] = 1;
+        game_Board[3][3] = 1;
+        game_Board[3][4] = 2;
+        game_Board[4][3] = 2;
+        game_Board[4][4] = 1;
     }
+
 
     public int pieceAt(int y, int x){
         return game_Board[y][x];
