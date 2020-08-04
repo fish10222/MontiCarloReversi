@@ -20,38 +20,41 @@ public class Main {
         boolean skippedMove = false;
         while(true){
             whosTurn(game);
+            printBoard(game);
             if (availableMoves.isEmpty()){
                 if (skippedMove) {
+                    System.out.println("No move available! Ending game.");
                     break;
                 }
                 System.out.println("No move available! Skipping turn.");
                 game.forceSkipMove();
                 skippedMove = true;
             }
-            acceptedMove = false;
-            printBoard(game);
-            System.out.println("Please type the Y Coordinate of your next move");
-            int number = input.nextInt();
-            if (number >= 0 && number < 8){
-                move[0]=number;
-            }
-            System.out.println("Please type the X Coordinate of your next move");
-            number = input.nextInt();
-            if (number >= 0 && number < 8){
-                move[1]=number;
-            }
-            nextMove.setLocation(move[1], move[0]);
-            for (final Point validMove : availableMoves){
-                if(nextMove.equals(validMove)){
-                    skippedMove = false;
-                    game.makeMove(move[0], move[1]);
-                    availableMoves = game.validMoves();
-                    acceptedMove = true;
-                    break;
+            else {
+                acceptedMove = false;
+                System.out.println("Please type the Y Coordinate of your next move");
+                int number = input.nextInt();
+                if (number >= 0 && number < 8) {
+                    move[0] = number;
                 }
-            }
-            if (!acceptedMove){
-                System.out.println("Invalid move");
+                System.out.println("Please type the X Coordinate of your next move");
+                number = input.nextInt();
+                if (number >= 0 && number < 8) {
+                    move[1] = number;
+                }
+                nextMove.setLocation(move[1], move[0]);
+                for (final Point validMove : availableMoves) {
+                    if (nextMove.equals(validMove)) {
+                        skippedMove = false;
+                        game.makeMove(move[0], move[1]);
+                        availableMoves = game.validMoves();
+                        acceptedMove = true;
+                        break;
+                    }
+                }
+                if (!acceptedMove) {
+                    System.out.println("Invalid move");
+                }
             }
         }
         System.out.println("==========");
