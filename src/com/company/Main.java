@@ -2,15 +2,17 @@ package com.company;
 import com.company.Reversi;
 import com.company.PureMCTS;
 
+import java.util.List;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.awt.Point;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
 
-    public static void main(String[] args) {
-        final int PLAYOUTS = 500;
+    public static void main(String[] args) throws InterruptedException  {
+        final int PLAYOUTS = 7500;
 	    // write your code here
         Reversi game = new Reversi();
         game.newGame();
@@ -24,6 +26,8 @@ public class Main {
         PureMCTS AI;
         Point AI_Move;
         int[] AI_wins;
+        AtomicInteger wins = new AtomicInteger(0);
+        List<Thread> threadList = new ArrayList<Thread>();
         while(true) {
             while(true) {
                 System.out.println("Would you like to make a move first? (Y/N)");
@@ -34,10 +38,17 @@ public class Main {
                     AI_wins = new int[availableMoves.size()];
                     for (int n = 0; n < availableMoves.size(); n++) {
                         AI_Move = availableMoves.get(n);
+                        wins = new AtomicInteger(0);
+                        threadList = new ArrayList<Thread>();
                         for (int i = 0; i < PLAYOUTS; i++) {
-                            AI = new PureMCTS(game);
-                            AI_wins[n] += AI.randomPlayout(AI_Move);
+                            //AI = new PureMCTS(game);
+                            //AI.randomPlayout(AI_Move);
+                            Thread t = new Thread(new PureMCTS(game, AI_Move, wins));
+                            t.start();
+                            threadList.add(t);
+                            System.out.println("Spawned new Thread " + t.getId());
                         }
+                        AI_wins[n] = wins.intValue();
                     }
                     int largest = 0;
                     for (int i = 1; i < AI_wins.length; i++) {
@@ -116,10 +127,16 @@ public class Main {
                     AI_wins = new int[availableMoves.size()];
                     for (int n = 0; n < availableMoves.size(); n++) {
                         AI_Move = availableMoves.get(n);
+                        wins = new AtomicInteger(0);
+                        threadList = new ArrayList<Thread>();
                         for (int i = 0; i < PLAYOUTS; i++) {
-                            AI = new PureMCTS(game);
-                            AI_wins[n] += AI.randomPlayout(AI_Move);
+                            //AI = new PureMCTS(game);
+                            //AI.randomPlayout(AI_Move);
+                            Thread t = new Thread(new PureMCTS(game, AI_Move, wins));
+                            t.start();
+                            threadList.add(t);
                         }
+                        AI_wins[n] = wins.intValue();
                     }
                     int largest = 0;
                     for (int i = 1; i < AI_wins.length; i++) {
@@ -182,6 +199,13 @@ public class Main {
     public static void checkWinner(Reversi game, int human){
         int winner = game.whoWon();
         int[] scores = game.scores();
+        int cpu = 1;
+        if (human == 1){
+            int CPU = 0;
+        }
+        else{
+            int CPU = 1;
+        }
         if (winner == 0){
             System.out.println("It's a tie!");
         }
@@ -194,8 +218,8 @@ public class Main {
         System.out.println("===========");
         System.out.println("Final Score");
         System.out.println("===========");
-        System.out.println("Human: " + scores[0]);
-        System.out.println("CPU: " + scores[1]);
+        System.out.println("Human: " + scores[human]);
+        System.out.println("CPU: " + scores[cpu]);
     }
 
     public static void whosTurn(Reversi game, int human){
