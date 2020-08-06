@@ -41,7 +41,14 @@ public class Main extends JPanel implements MouseListener{
     static Point nextMove = new Point(0,0);
     static ArrayList<Point> availableMoves = new ArrayList<Point>();
     static Reversi game = new Reversi();
-    static boolean mouseclick = false;
+    static boolean playerturn = false;
+    static boolean acceptedMove;
+    static boolean skippedMove = false;
+    static int human = 1;
+    static PureMCTS AI;
+    static Point AI_Move;
+    static int[] AI_wins;
+    static final int PLAYOUTS = 500;
 
     public Main() {
 
@@ -153,32 +160,27 @@ public class Main extends JPanel implements MouseListener{
         frame.setVisible(true);
         System.out.println("DRAW BOARD");
 
+
+
     }
 
     public static void main(String[] args) throws InterruptedException {
-        final int PLAYOUTS = 500;
+//        final int PLAYOUTS = 500;
 	    // write your code here
 //        Reversi game = new Reversi();
         game.newGame();
         Scanner input = new Scanner(System.in);
         //int[] move = {0, 0};
-        boolean acceptedMove;
+//        boolean acceptedMove;
         availableMoves = game.validMoves();
 //        Point nextMove = new Point(0,0);
-        boolean skippedMove = false;
-        int human = 1;
-        PureMCTS AI;
-        Point AI_Move;
-        int[] AI_wins;
+        skippedMove = false;
+        human = 1;
+//        PureMCTS AI;
+//        Point AI_Move;
+//        int[] AI_wins;
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new Main();
-            }
-        });
-
-        while(true) {
+//        while(true) {
             while(true) {
                 System.out.println("Would you like to make a move first? (Y/N)");
                 String goFirst = input.next();
@@ -207,6 +209,7 @@ public class Main extends JPanel implements MouseListener{
                     break;
                 } else if (goFirst.equals("y") || goFirst.equals("yes")) {
                     human = 1;
+                    playerturn = true;
                     System.out.println("Player's piece is: X");
                     break;
                 } else {
@@ -214,22 +217,30 @@ public class Main extends JPanel implements MouseListener{
                 }
 
             }
-            while (true) {
+
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    new Main();
+                }
+            });
+
+//            while (true) {
                 whosTurn(game, human);
                 printBoard(game);
                 if (availableMoves.isEmpty()) {
                     if (skippedMove) {
                         System.out.println("No move available! Ending game.");
-                        break;
+//                        break;
                     }
                     System.out.println("No move available! Skipping turn.");
                     game.forceSkipMove();
                     availableMoves = game.validMoves();
                     skippedMove = true;
                 } else {
-                    while (true) {
-                        acceptedMove = false;
-                        mouseclick = false;
+//                    while (true) {
+//                        acceptedMove = false;
+//                        mouseclick = false;
 //                        System.out.println("Please type the Y Coordinate of your next move");
 //                        int number = input.nextInt();
 //                        if (number >= 0 && number < 8) {
@@ -240,82 +251,83 @@ public class Main extends JPanel implements MouseListener{
 //                        if (number >= 0 && number < 8) {
 //                            move[1] = number;
 //                        }
-                        while (!mouseclick){
-                            System.out.println(mouseclick);
-                            TimeUnit.SECONDS.sleep(1);
-                        }
-                        System.out.println(nextMove);
+////                        while (!mouseclick){
+////                            System.out.println(mouseclick);
+////                            TimeUnit.SECONDS.sleep(1);
+////                        }
+//                        System.out.println(nextMove);
 //                        nextMove.setLocation(move[1], move[0]);
-                        for (final Point validMove : availableMoves) {
-                            if (nextMove.equals(validMove)) {
-                                skippedMove = false;
-                                game.makeMove(move[0], move[1]);
-                                availableMoves = game.validMoves();
-                                acceptedMove = true;
-                                panel.repaint();
-                                break;
-                            }
-                        }
-                        if (!acceptedMove) {
-                            System.out.println("Invalid move");
-                        } else {
-                            break;
-                        }
-                    }
+//                        for (final Point validMove : availableMoves) {
+//                            if (nextMove.equals(validMove)) {
+//                                skippedMove = false;
+//                                game.makeMove(move[0], move[1]);
+//                                availableMoves = game.validMoves();
+//                                acceptedMove = true;
+//                                panel.repaint();
+//                                break;
+//                            }
+//                        }
+//                        if (!acceptedMove) {
+//                            System.out.println("Invalid move");
+//                        } else {
+//                            break;
+//                        }
+//                    }
                 }
 
-                // Human move accepted or skipped, now is AI's turn.
-                if (availableMoves.isEmpty()) {
-                    if (skippedMove) {
-                        System.out.println("No move available! Ending game.");
-                        break;
-                    }
-                    System.out.println("No move available! Skipping turn.");
-                    game.forceSkipMove();
-                    availableMoves = game.validMoves();
-                    skippedMove = true;
-                } else {
-                    AI_wins = new int[availableMoves.size()];
-                    for (int n = 0; n < availableMoves.size(); n++) {
-                        AI_Move = availableMoves.get(n);
-                        for (int i = 0; i < PLAYOUTS; i++) {
-                            AI = new PureMCTS(game);
-                            AI_wins[n] += AI.randomPlayout(AI_Move);
-                        }
-                    }
-                    int largest = 0;
-                    for (int i = 1; i < AI_wins.length; i++) {
-                        if (AI_wins[i] > AI_wins[largest]) {
-                            largest = i;
-                        }
-                    }
-                    // Do move:
-                    AI_Move = availableMoves.get(largest);
-                    game.makeMove(AI_Move.y, AI_Move.x);
-                    availableMoves = game.validMoves();
-                }
+//                // Human move accepted or skipped, now is AI's turn.
+//                if (availableMoves.isEmpty()) {
+//                    if (skippedMove) {
+//                        System.out.println("No move available! Ending game.");
+//                        break;
+//                    }
+//                    System.out.println("No move available! Skipping turn.");
+//                    game.forceSkipMove();
+//                    availableMoves = game.validMoves();
+//                    skippedMove = true;
+//                } else {
+//                    AI_wins = new int[availableMoves.size()];
+//                    for (int n = 0; n < availableMoves.size(); n++) {
+//                        AI_Move = availableMoves.get(n);
+//                        for (int i = 0; i < PLAYOUTS; i++) {
+//                            AI = new PureMCTS(game);
+//                            AI_wins[n] += AI.randomPlayout(AI_Move);
+//                        }
+//                    }
+//                    int largest = 0;
+//                    for (int i = 1; i < AI_wins.length; i++) {
+//                        if (AI_wins[i] > AI_wins[largest]) {
+//                            largest = i;
+//                        }
+//                    }
+//                    // Do move:
+//                    AI_Move = availableMoves.get(largest);
+//                    game.makeMove(AI_Move.y, AI_Move.x);
+//                    availableMoves = game.validMoves();
+//                    panel.repaint();
+//                }
 
-            }
-            System.out.println("==========");
-            System.out.println("Game Over!");
-            System.out.println("==========");
-            checkWinner(game, human);
-            while(true) {
-                System.out.println("Would you like to play again? (Y/N)");
-                String goFirst = input.next();
-                goFirst.toLowerCase();
-                if (goFirst.equals("n") || goFirst.equals("no")) {
-                    System.out.println("Good game!");
-                    System.exit(0);
-                }
-                else if (goFirst.equals("y") || goFirst.equals("yes")) {
-                    game.newGame();
-                    availableMoves = game.validMoves();
-                    skippedMove = false;
-                    break;
-                }
-            }
-        }
+//            }
+//            System.out.println("==========");
+//            System.out.println("Game Over!");
+//            System.out.println("==========");
+//            checkWinner(game, human);
+//            while(true) {
+//                System.out.println("Would you like to play again? (Y/N)");
+//                String goFirst = input.next();
+//                goFirst.toLowerCase();
+//                if (goFirst.equals("n") || goFirst.equals("no")) {
+//                    System.out.println("Good game!");
+//                    System.exit(0);
+//                }
+//                else if (goFirst.equals("y") || goFirst.equals("yes")) {
+//                    game.newGame();
+//                    availableMoves = game.validMoves();
+//                    skippedMove = false;
+//                    break;
+//                }
+//            }
+//        }
     }
 
     public static void printBoard(Reversi game){
@@ -383,25 +395,38 @@ public class Main extends JPanel implements MouseListener{
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        acceptedMove = false;
         int x, y, i = 0, j = 0;
         x = e.getX();
         y = e.getY();
         i = x/60;
         j = y/60;
-        System.out.println(x);
         System.out.println(j);
-        System.out.println("X is: " + i);
-        System.out.println("Y is: " + j);
-        nextMove.setLocation(j, i);
+        System.out.println(i);
+        nextMove.setLocation(i, j);
+        System.out.println(nextMove);
+        availableMoves = game.validMoves();
+        System.out.println("available move " + availableMoves);
         for (final Point validMove : availableMoves) {
             if (nextMove.equals(validMove)) {
                 System.out.println("VALID MOVE");
                 move[0] = j;
                 move[1] = i;
-                mouseclick = true;
-                System.out.println(mouseclick);
+                System.out.println(move);
+                playerturn = true;
+                System.out.println(playerturn);
+                skippedMove = false;
+                game.makeMove(move[0], move[1]);
+                System.out.println("MOVE MADE");
+                availableMoves = game.validMoves();
+                acceptedMove = true;
+                panel.repaint();
             }
         }
+
+
+        System.out.println(nextMove);
+        printBoard(game);
 //        if(accepted(i,j)){
 //            if(turn == 1){
 //                data[i][j]=turn;
@@ -416,6 +441,39 @@ public class Main extends JPanel implements MouseListener{
 //
 //            panel.repaint();
 //        }
+        if (acceptedMove) {
+            // Human move accepted or skipped, now is AI's turn.
+            if (availableMoves.isEmpty()) {
+                if (skippedMove) {
+                    System.out.println("No move available! Ending game.");
+                }
+                System.out.println("No move available! Skipping turn.");
+                game.forceSkipMove();
+                availableMoves = game.validMoves();
+                skippedMove = true;
+            } else {
+                AI_wins = new int[availableMoves.size()];
+                for (int n = 0; n < availableMoves.size(); n++) {
+                    AI_Move = availableMoves.get(n);
+                    for (int z = 0; z < PLAYOUTS; z++) {
+                        AI = new PureMCTS(game);
+                        AI_wins[n] += AI.randomPlayout(AI_Move);
+                    }
+                }
+                int largest = 0;
+                for (int z = 1; z < AI_wins.length; z++) {
+                    if (AI_wins[z] > AI_wins[largest]) {
+                        largest = z;
+                    }
+                }
+                // Do move:
+                AI_Move = availableMoves.get(largest);
+                game.makeMove(AI_Move.y, AI_Move.x);
+                availableMoves = game.validMoves();
+                panel.repaint();
+            }
+        }
+        printBoard(game);
         panel.repaint();
     }
 
