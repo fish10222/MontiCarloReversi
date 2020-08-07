@@ -3,20 +3,27 @@ package com.company;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.company.Reversi;
 
-public class PureMCTS {
+public class PureMCTS implements Runnable {
     Random rand = new Random();
+    Point first_Move;
     Reversi game;
+    AtomicInteger totalWins;
 
-    public PureMCTS(Reversi currentGame){
+    public PureMCTS(Reversi currentGame, Point AI_Move, AtomicInteger wins){
         // Invoke Copy Constructor
         game = new Reversi(currentGame);
+        first_Move = AI_Move;
+        totalWins = wins;
     }
 
-    public int randomPlayout(Point AI_Move){
+    @Override
+    public void run(){
         Point nextMove;
-        game.makeMove(AI_Move.y, AI_Move.x);
+        game.makeMove(first_Move.y, first_Move.x);
         ArrayList<Point> availableMoves = game.validMoves();
         boolean skippedMove = false;
         while(true) {
@@ -43,15 +50,17 @@ public class PureMCTS {
         }
         int winner = game.whoWon();
         if (winner == 1){
-            return -1;
+            totalWins.addAndGet(-1);
+            return;
         }
         if (winner == 2){
-            return 1;
+            totalWins.addAndGet(1);
+            return;
         }
         if (winner == 0){
-            return 0;
+            totalWins.addAndGet(-1);
+            return;
         }
-        return 0;
     }
 }
 
