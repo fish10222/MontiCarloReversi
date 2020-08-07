@@ -14,6 +14,9 @@ public class Reversi {
     private int human_Score = 0;
     private int CPU_Score = 0;
 
+    public int CPU_identifier = 0;
+    public int Human_indentifier = 0;
+
     public int current_Move = 0;
     private final int board_length = 8;
 
@@ -32,9 +35,19 @@ public class Reversi {
             }
         }
         current_Move = original.current_Move;
+        CPU_identifier = original.CPU_identifier;
+        Human_indentifier = original.Human_indentifier;
     }
 
-    public void newGame(){
+    public void newGame(int human){
+        // Human going first
+        if (human == 1){
+            Human_indentifier = 1;
+            CPU_identifier = 2;
+        } else {
+            Human_indentifier = 2;
+            CPU_identifier = 1;
+        }
         current_Move = 1;
         for (int[] row: game_Board){
             Arrays.fill(row, 0);
@@ -45,7 +58,6 @@ public class Reversi {
         game_Board[4][4] = 1;
     }
 
-
     public int pieceAt(int y, int x){
         return game_Board[y][x];
     }
@@ -55,10 +67,10 @@ public class Reversi {
             return 0;
         }
         else if (human_Score > CPU_Score){
-            return 1;
+            return Human_indentifier;
         }
         else{
-            return 2;
+            return CPU_identifier;
         }
     }
 
@@ -169,7 +181,7 @@ public class Reversi {
                     else if(game_Board[y-n][x] == 0){
                         L_stop = true;
                     }
-                }
+            }
             // Scan towards Right side
             if (y + n < board_length && !R_stop){
                 // Will trigger at the first same piece found.
@@ -455,10 +467,10 @@ public class Reversi {
         int CPU = 0;
         for (int y = 0; y < board_length; y++){
             for (int x = 0; x < board_length; x++) {
-                if (game_Board[y][x] == 1){
+                if (game_Board[y][x] == Human_indentifier){
                     human++;
                 }
-                else if (game_Board[y][x] == 2){
+                else if (game_Board[y][x] == CPU_identifier){
                     CPU++;
                 }
             }

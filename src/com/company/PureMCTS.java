@@ -49,16 +49,16 @@ public class PureMCTS implements Runnable {
             }
         }
         int winner = game.whoWon();
-        if (winner == 1){
+        if (winner == game.Human_indentifier){
             totalWins.addAndGet(-1);
             return;
         }
-        if (winner == 2){
+        if (winner == game.CPU_identifier){
             totalWins.addAndGet(1);
             return;
         }
         if (winner == 0){
-            totalWins.addAndGet(-1);
+            totalWins.addAndGet(0);
             return;
         }
     }
