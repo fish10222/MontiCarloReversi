@@ -23,14 +23,15 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class Main extends JPanel implements MouseListener{
     static int gameSizeInt = 8;
     static JPanel panel = new JPanel() ;
     static int turn = 2;
-    static int black = 0;
-    static int white = 0;
+    static int humancount = 2;
+    static int cpu = 2;
     static int frei = 0;
     static int blue = 0;
     static int fontX = 10;
@@ -76,6 +77,7 @@ public class Main extends JPanel implements MouseListener{
         file.addSeparator();
         file.add(exitGame);
 
+
         exitGame.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
@@ -120,21 +122,9 @@ public class Main extends JPanel implements MouseListener{
                 }
                 g.setColor(Color.BLACK);
                 g.setFont(new Font ("Courier New", Font.BOLD, 15));
-                if(frei == 0){
-                    if(black > white){
-                        g.drawString("Black win     Black = " + black + "  White = " + white, fontX, fontY);
-                    }else if(black == white || noOneWin){
-                        g.drawString("No one win     Black = " + black + "  White = " + white, fontX, fontY);
-                    }else{
-                        g.drawString("White win     Black = " + black + "  White = " + white, fontX, fontY);
-                    }
-                }else{
-                    if(turn == 1){
-                        g.drawString("Black Turn     Black = " + black + "  White = " + white, fontX, fontY);
-                    }else{
-                        g.drawString("White Turn     Black = " + black + "  White = " + white, fontX, fontY);
-                    }
-                }
+                g.drawString("Black = " + humancount + "  White = " + cpu, fontX, fontY);
+
+
             }
 
 //            @Override
@@ -217,7 +207,6 @@ public class Main extends JPanel implements MouseListener{
                 }
 
             }
-
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -374,6 +363,24 @@ public class Main extends JPanel implements MouseListener{
         System.out.println("CPU: " + scores[1]);
     }
 
+    public static void count(Reversi game){
+        int[] scores = game.scores();
+        humancount = scores[0];
+        cpu = scores[1];
+        if ((humancount + cpu) == 64){
+            if (humancount > cpu){
+                JOptionPane.showMessageDialog(panel, "YOU WIN!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+            else if (cpu > humancount){
+                JOptionPane.showMessageDialog(panel, "YOU LOSE!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+            else{
+                JOptionPane.showMessageDialog(panel, "DRAW!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        }
+    }
+
     public static void whosTurn(Reversi game, int human){
         if (game.current_Move == human){
             System.out.println("Human move");
@@ -424,23 +431,8 @@ public class Main extends JPanel implements MouseListener{
             }
         }
 
-
         System.out.println(nextMove);
         printBoard(game);
-//        if(accepted(i,j)){
-//            if(turn == 1){
-//                data[i][j]=turn;
-//                fillAll(i, j);
-//                turn = 2;
-//            }else{
-//                data[i][j]=turn;
-//                fillAll(i, j);
-//                turn = 1;
-//            }
-//            help();
-//
-//            panel.repaint();
-//        }
         if (acceptedMove) {
             // Human move accepted or skipped, now is AI's turn.
             if (availableMoves.isEmpty()) {
@@ -475,6 +467,7 @@ public class Main extends JPanel implements MouseListener{
         }
         printBoard(game);
         panel.repaint();
+        count(game);
     }
 
     @Override
