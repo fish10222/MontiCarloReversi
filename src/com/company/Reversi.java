@@ -28,15 +28,15 @@ public class Reversi {
     // Copy constructor
     public Reversi(Reversi original){
         // Deep copy of Game Board
-        game_Board = new int[board_length][board_length];
+        this.game_Board = new int[board_length][board_length];
         for (int y = 0; y < board_length; y++){
             for (int x = 0; x < board_length; x++){
                 game_Board[y][x] = original.game_Board[y][x];
             }
         }
-        current_Move = original.current_Move;
-        CPU_identifier = original.CPU_identifier;
-        Human_indentifier = original.Human_indentifier;
+        this.current_Move = original.current_Move;
+        this.CPU_identifier = original.CPU_identifier;
+        this.Human_indentifier = original.Human_indentifier;
     }
 
     public void newGame(int human){
