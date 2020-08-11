@@ -14,7 +14,7 @@ public class PureMCTS {
         game = new Reversi(currentGame);
     }
 
-    public int randomPlayout(Point AI_Move){
+    public int randomPlayout(Point AI_Move, int player){
         Point nextMove;
         game.makeMove(AI_Move.y, AI_Move.x);
         ArrayList<Point> availableMoves = game.validMoves();
@@ -42,10 +42,17 @@ public class PureMCTS {
             }
         }
         int winner = game.whoWon();
-        if (winner == 1){
+        int opponent = -1;
+        if (player == 1){
+            opponent = 2;
+        }
+        if (player == 2){
+            opponent = 1;
+        }
+        if (winner == opponent){
             return -1;
         }
-        if (winner == 2){
+        if (winner == player){
             return 1;
         }
         if (winner == 0){

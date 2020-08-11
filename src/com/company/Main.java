@@ -2,7 +2,6 @@ package com.company;
 import com.company.Reversi;
 import com.company.PureMCTS;
 
-import java.util.concurrent.TimeUnit;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,8 +49,15 @@ public class Main extends JPanel implements MouseListener{
     static Point AI_Move;
     static int[] AI_wins;
     static final int PLAYOUTS = 500;
-    static int[] stats = {0, 0, 0};
     static int AINum =2;
+    static int[][] boardValues;
+    static boolean playCorner;
+    static AtomicInteger wins;
+    static final ArrayList<Point> corners = new ArrayList<Point>();
+    static List<Thread> threadList;
+    static final int MCTS_PLAYOUTS = 10000;
+    static int lowest = -1500;
+    static boolean PureMCTSAI = true;
 
     public Main() {
 
@@ -62,7 +68,6 @@ public class Main extends JPanel implements MouseListener{
         frame.setLocation(450, 150);
         panel.setPreferredSize(new Dimension(361, 385));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //frame.setLayout(null);
         frame.setResizable(false);
         frame.getContentPane().setBackground( new Color(18, 199, 24));
 
@@ -137,14 +142,17 @@ public class Main extends JPanel implements MouseListener{
                     availableMoves = game.validMoves();
                     for (int i = 0; i < availableMoves.size(); i++) {
                         Point curr = availableMoves.get(i);
-
                         g.setColor(Color.BLUE);
                         g.fillOval(20 + curr.x * 60, 20 + curr.y * 60, 25, 25);
                     }
                 }
                 g.setColor(Color.BLACK);
                 g.setFont(new Font ("Courier New", Font.BOLD, 15));
-                g.drawString("Black = " + humancount + "  White = " + cpu, fontX, fontY);
+                if (human == 1) {
+                    g.drawString("Black = " + humancount + "  White = " + cpu + "                   You are Black", fontX, fontY);
+                } else if (human == 2){
+                    g.drawString("Black = " + humancount + "  White = " + cpu + "                   You are White", fontX, fontY);
+                }
             }
         };
 
@@ -162,7 +170,7 @@ public class Main extends JPanel implements MouseListener{
 
     public static void AIvAI() {
         final int MCTS_PLAYOUTS = 10000;
-        final int NUMBER_OF_GAMES = 100;
+        final int NUMBER_OF_GAMES = 1;
         final ArrayList<Point> corners = new ArrayList<Point>();
         corners.add(new Point(0,0));
         corners.add(new Point(0,7));
@@ -262,51 +270,6 @@ public class Main extends JPanel implements MouseListener{
             }
 
             while (true) {
-                /*whosTurn(game, human);
-                printBoard(game);
-                if (availableMoves.isEmpty()) {
-                    if (skippedMove) {
-                        System.out.println("No move available! Ending game.");
-                        break;
-                    }
-                    System.out.println("No move available! Skipping turn.");
-                    game.forceSkipMove();
-                    availableMoves = game.validMoves();
-                    skippedMove = true;
-                } else {
-                    while (true) {
-                        acceptedMove = false;
-                        System.out.println("Please type the Y Coordinate of your next move");
-                        int number = input.nextInt();
-                        if (number >= 0 && number < 8) {
-                            move[0] = number;
-                        }
-                        System.out.println("Please type the X Coordinate of your next move");
-                        number = input.nextInt();
-                        if (number >= 0 && number < 8) {
-                            move[1] = number;
-                        }
-                        nextMove.setLocation(move[1], move[0]);
-                        for (final Point validMove : availableMoves) {
-                            if (nextMove.equals(validMove)) {
-                                skippedMove = false;
-                                game.makeMove(move[0], move[1]);
-                                availableMoves = game.validMoves();
-                                acceptedMove = true;
-                                printBoard(game);
-                                System.out.println("Waiting for AI's move...");
-                                break;
-                            }
-                        }
-                        if (!acceptedMove) {
-                            System.out.println("Invalid move");
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                // Human move accepted or skipped, now is AI's turn.*/
-
                 // ImprovedAI Move.
                 System.out.println("Improved Heuristics Move");
                 printBoard(game);
@@ -359,8 +322,8 @@ public class Main extends JPanel implements MouseListener{
                     updateHeuristicBoard(boardValues, AI_Move, true);
                     Heuristics_moves++;
                     skippedMove = false;
-
                 }
+
                 availableMoves = game.validMoves();
                 System.out.println("Pure MCTS Move");
                 printBoard(game);
@@ -463,13 +426,12 @@ public class Main extends JPanel implements MouseListener{
     public static void main(String[] args) throws InterruptedException {
         Scanner input = new Scanner(System.in);
         if (args.length != 0){
+            // Begin AIvAI if command args is present
             if (args[0].equals("AI")){
                 AIvAI();
             }
-            //DO AI STUFF
         } else {
-            human = 1;
-            humanOrAI();
+            chooseAI();
             startGame();
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -531,7 +493,7 @@ public class Main extends JPanel implements MouseListener{
     }
 
 
-    public static void humanOrAI(){
+    public static void chooseAI(){
 //        game.newGame();
 //        availableMoves = game.validMoves();
 //        skippedMove = false;
@@ -541,54 +503,56 @@ public class Main extends JPanel implements MouseListener{
         int result = JOptionPane.showOptionDialog(null, popup, "Mode Selection",
                 JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
                 null, options, null);
-
         if (result == JOptionPane.NO_OPTION) {
             System.out.println("Heuristic");
+            PureMCTSAI = false;
+            corners.add(new Point(0,0));
+            corners.add(new Point(0,7));
+            corners.add(new Point(7,0));
+            corners.add(new Point(7,7));
+            boardValues = new int[][]{
+                    {1000, lowest, 1000, 1000, 1000, 1000, lowest, 1000},
+                    {lowest, lowest, 0, 0, 0, 0, lowest, lowest},
+                    {1000, 0, 0, 0, 0, 0, 0, 1000},
+                    {1000, 0, 0, 0, 0, 0, 0, 1000},
+                    {1000, 0, 0, 0, 0, 0, 0, 1000},
+                    {1000, 0, 0, 0, 0, 0, 0, 1000},
+                    {lowest, lowest, 0, 0, 0, 0, lowest, lowest},
+                    {1000, lowest, 1000, 1000, 1000, 1000, lowest, 1000}};
         } else if (result == JOptionPane.YES_OPTION) {
             System.out.println("Pure MCTS");
         }
     }
 
     public static void startGame(){
-        game.newGame();
-        availableMoves = game.validMoves();
+//        game.newGame();
         skippedMove = false;
         JPanel popup = new JPanel();
         popup.add(new JLabel("Player goes first?"));
         Object[] options = { "Yes", "No"};
-        int result = JOptionPane.showOptionDialog(null, popup, "Who goes first?",
-                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
-                null, options, null);
-
-        if (result == JOptionPane.YES_OPTION){
-            System.out.println("Yes");
-        }
-
+        int result;
+        //Makes sure user selects something
+        do{
+            result = JOptionPane.showOptionDialog(null, popup, "Who goes first?",
+                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+                    null, options, null);
+        } while (result == JOptionPane.CLOSED_OPTION);
         if (result == JOptionPane.NO_OPTION) {
             human = 2;
-            AI_wins = new int[availableMoves.size()];
-            for (int n = 0; n < availableMoves.size(); n++) {
-                AI_Move = availableMoves.get(n);
-                for (int i = 0; i < PLAYOUTS; i++) {
-                    AI = new PureMCTS(game);
-                    AI_wins[n] += AI.randomPlayout(AI_Move);
-                }
-            }
-            int largest = 0;
-            for (int i = 1; i < AI_wins.length; i++) {
-                if (AI_wins[i] > AI_wins[largest]) {
-                    largest = i;
-                }
-            }
-            // Do move:
-            AI_Move = availableMoves.get(largest);
-            game.makeMove(AI_Move.y, AI_Move.x);
+            AINum = 1;
+            game.newGame(AINum);
             availableMoves = game.validMoves();
-            System.out.println("Player's piece is: O");
+            if (PureMCTSAI) {
+                PureMCTSMove();
+            } else {
+                heuristicMove();
+            }
         } else if (result == JOptionPane.YES_OPTION) {
             human = 1;
+            AINum = 2;
+            game.newGame(human);
+            availableMoves = game.validMoves();
             playerturn = true;
-            System.out.println("Player's piece is: X");
         }
     }
 
@@ -608,7 +572,76 @@ public class Main extends JPanel implements MouseListener{
                 JOptionPane.showMessageDialog(panel, "DRAW!", "Result",JOptionPane.INFORMATION_MESSAGE);
             }
 
+        } else if (availableMoves.isEmpty()){
+            if (humancount > cpu){
+                JOptionPane.showMessageDialog(panel, "YOU WIN!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+            else if (cpu > humancount){
+                JOptionPane.showMessageDialog(panel, "YOU LOSE!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+            else{
+                JOptionPane.showMessageDialog(panel, "DRAW!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
         }
+    }
+
+
+    public static void heuristicMove(){
+        System.out.println("Improved Heuristics Move");
+        printBoard(game);
+        availableMoves = game.validMoves();
+        playCorner = false;
+        AI_Move = availableMoves.get(0);
+        AI_wins = new int[availableMoves.size()];
+        for (int n = 0; n < availableMoves.size(); n++) {
+            AI_Move = availableMoves.get(n);
+            int scale = boardValues[(int)AI_Move.getY()][(int)AI_Move.getX()];
+            AI_wins[n] = scale;
+            wins = new AtomicInteger(0);
+            if (corners.contains(AI_Move)){
+                // Play the corner. Skip other possible moves.
+                playCorner = true;
+                break;
+            }
+            threadList = new ArrayList<Thread>();
+            for (int i = 0; i < MCTS_PLAYOUTS; i++) {
+                AI = new PureMCTS(game);
+                AI_wins[n] += AI.randomPlayout(AI_Move, human);
+            }
+        }
+        if (!playCorner) {
+            int largest = 0;
+            for (int i = 1; i < AI_wins.length; i++) {
+                if (AI_wins[i] > AI_wins[largest]) {
+                    largest = i;
+                }
+            }
+            AI_Move = availableMoves.get(largest);
+        }
+        game.makeMove(AI_Move.y, AI_Move.x);
+        updateHeuristicBoard(boardValues, AI_Move, true);
+    }
+
+    public static void PureMCTSMove (){
+        AI_wins = new int[availableMoves.size()];
+        for (int n = 0; n < availableMoves.size(); n++) {
+            AI_Move = availableMoves.get(n);
+            for (int z = 0; z < PLAYOUTS; z++) {
+                AI = new PureMCTS(game);
+                AI_wins[n] += AI.randomPlayout(AI_Move, AINum);
+            }
+        }
+        int largest = 0;
+        for (int z = 1; z < AI_wins.length; z++) {
+            if (AI_wins[z] > AI_wins[largest]) {
+                largest = z;
+            }
+        }
+        // Do move:
+        AI_Move = availableMoves.get(largest);
+        game.makeMove(AI_Move.y, AI_Move.x);
+        availableMoves = game.validMoves();
+
     }
 
     public static void whosTurn(Reversi game, int human){
@@ -643,7 +676,6 @@ public class Main extends JPanel implements MouseListener{
         nextMove.setLocation(i, j);
         System.out.println(nextMove);
         availableMoves = game.validMoves();
-        System.out.println("available move " + availableMoves);
         for (final Point validMove : availableMoves) {
             if (nextMove.equals(validMove)) {
                 System.out.println("VALID MOVE");
@@ -660,10 +692,7 @@ public class Main extends JPanel implements MouseListener{
             }
         }
         panel.repaint();
-        System.out.println(nextMove);
-        printBoard(game);
         if (acceptedMove) {
-            // Human move accepted or skipped, now is AI's turn.
             if (availableMoves.isEmpty()) {
                 if (skippedMove) {
                     System.out.println("No move available! Ending game.");
@@ -673,24 +702,11 @@ public class Main extends JPanel implements MouseListener{
                 availableMoves = game.validMoves();
                 skippedMove = true;
             } else {
-                AI_wins = new int[availableMoves.size()];
-                for (int n = 0; n < availableMoves.size(); n++) {
-                    AI_Move = availableMoves.get(n);
-                    for (int z = 0; z < PLAYOUTS; z++) {
-                        AI = new PureMCTS(game);
-                        AI_wins[n] += AI.randomPlayout(AI_Move);
-                    }
+                if (PureMCTSAI) {
+                    PureMCTSMove();
+                } else {
+                    heuristicMove();
                 }
-                int largest = 0;
-                for (int z = 1; z < AI_wins.length; z++) {
-                    if (AI_wins[z] > AI_wins[largest]) {
-                        largest = z;
-                    }
-                }
-                // Do move:
-                AI_Move = availableMoves.get(largest);
-                game.makeMove(AI_Move.y, AI_Move.x);
-                availableMoves = game.validMoves();
                 panel.repaint();
             }
         }
