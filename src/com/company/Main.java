@@ -128,13 +128,6 @@ public class Main extends JPanel implements MouseListener{
                                 g.setColor(Color.WHITE);
                                 g.fillOval(5+i * 60, 5+j * 60, 50, 50);
                                 break;
-                            case -1:
-                                if(help.getState()){
-                                    g.setColor(Color.BLUE);
-                                    g.fillOval(20+i * 60, 20+j * 60, 25, 25);
-                                }
-                                break;
-
                         }
                     }
                 }
@@ -494,9 +487,6 @@ public class Main extends JPanel implements MouseListener{
 
 
     public static void chooseAI(){
-//        game.newGame();
-//        availableMoves = game.validMoves();
-//        skippedMove = false;
         JPanel popup = new JPanel();
         popup.add(new JLabel("Play against Pure MCTS or Heuristic"));
         Object[] options = { "Pure MCTS", "Heuristic"};
@@ -683,12 +673,9 @@ public class Main extends JPanel implements MouseListener{
                 System.out.println("VALID MOVE");
                 move[0] = j;
                 move[1] = i;
-                System.out.println(move);
                 playerturn = true;
-                System.out.println(playerturn);
                 skippedMove = false;
                 game.makeMove(move[0], move[1]);
-                System.out.println("MOVE MADE");
                 availableMoves = game.validMoves();
                 acceptedMove = true;
             }
@@ -709,7 +696,6 @@ public class Main extends JPanel implements MouseListener{
                 } else {
                     heuristicMove();
                 }
-                panel.repaint();
             }
         }
         printBoard(game);
