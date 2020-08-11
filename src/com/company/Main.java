@@ -55,7 +55,7 @@ public class Main extends JPanel implements MouseListener{
     static AtomicInteger wins;
     static final ArrayList<Point> corners = new ArrayList<Point>();
     static List<Thread> threadList;
-    static final int MCTS_PLAYOUTS = 10000;
+    static final int MCTS_PLAYOUTS = 5000;
     static int lowest = -1500;
     static boolean PureMCTSAI = true;
 
@@ -142,9 +142,9 @@ public class Main extends JPanel implements MouseListener{
                 g.setColor(Color.BLACK);
                 g.setFont(new Font ("Courier New", Font.BOLD, 15));
                 if (human == 1) {
-                    g.drawString("Black = " + humancount + "  White = " + cpu + "                   You are Black", fontX, fontY);
+                    g.drawString("Black = " + humancount + "  White = " + cpu + "                You are Black", fontX, fontY);
                 } else if (human == 2){
-                    g.drawString("Black = " + humancount + "  White = " + cpu + "                   You are White", fontX, fontY);
+                    g.drawString("Black = " + humancount + "  White = " + cpu + "                You are White", fontX, fontY);
                 }
             }
         };
@@ -530,7 +530,7 @@ public class Main extends JPanel implements MouseListener{
         if (result == JOptionPane.NO_OPTION) {
             human = 2;
             AINum = 1;
-            game.newGame(AINum);
+            game.newGame(human);
             availableMoves = game.validMoves();
             if (PureMCTSAI) {
                 PureMCTSMove();
@@ -563,14 +563,16 @@ public class Main extends JPanel implements MouseListener{
             }
 
         } else if (availableMoves.isEmpty()){
-            if (humancount > cpu){
-                JOptionPane.showMessageDialog(panel, "YOU WIN!", "Result",JOptionPane.INFORMATION_MESSAGE);
-            }
-            else if (cpu > humancount){
-                JOptionPane.showMessageDialog(panel, "YOU LOSE!", "Result",JOptionPane.INFORMATION_MESSAGE);
-            }
-            else{
-                JOptionPane.showMessageDialog(panel, "DRAW!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            game.forceSkipMove();
+            availableMoves = game.validMoves();
+            if (availableMoves.isEmpty()) {
+                if (humancount > cpu) {
+                    JOptionPane.showMessageDialog(panel, "YOU WIN!", "Result", JOptionPane.INFORMATION_MESSAGE);
+                } else if (cpu > humancount) {
+                    JOptionPane.showMessageDialog(panel, "YOU LOSE!", "Result", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(panel, "DRAW!", "Result", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
         }
     }
