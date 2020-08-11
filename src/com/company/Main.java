@@ -170,7 +170,7 @@ public class Main extends JPanel implements MouseListener{
 
     public static void AIvAI() {
         final int MCTS_PLAYOUTS = 10000;
-        final int NUMBER_OF_GAMES = 1;
+        final int NUMBER_OF_GAMES = 100;
         final ArrayList<Point> corners = new ArrayList<Point>();
         corners.add(new Point(0,0));
         corners.add(new Point(0,7));
