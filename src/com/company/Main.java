@@ -55,7 +55,7 @@ public class Main extends JPanel implements MouseListener{
     static AtomicInteger wins;
     static final ArrayList<Point> corners = new ArrayList<Point>();
     static List<Thread> threadList;
-    static final int MCTS_PLAYOUTS = 10000;
+    static final int MCTS_PLAYOUTS = 5000;
     static int lowest = -1500;
     static boolean PureMCTSAI = true;
 
@@ -540,7 +540,7 @@ public class Main extends JPanel implements MouseListener{
         if (result == JOptionPane.NO_OPTION) {
             human = 2;
             AINum = 1;
-            game.newGame(AINum);
+            game.newGame(human);
             availableMoves = game.validMoves();
             if (PureMCTSAI) {
                 PureMCTSMove();
