@@ -573,14 +573,16 @@ public class Main extends JPanel implements MouseListener{
             }
 
         } else if (availableMoves.isEmpty()){
-            if (humancount > cpu){
-                JOptionPane.showMessageDialog(panel, "YOU WIN!", "Result",JOptionPane.INFORMATION_MESSAGE);
-            }
-            else if (cpu > humancount){
-                JOptionPane.showMessageDialog(panel, "YOU LOSE!", "Result",JOptionPane.INFORMATION_MESSAGE);
-            }
-            else{
-                JOptionPane.showMessageDialog(panel, "DRAW!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            game.forceSkipMove();
+            availableMoves = game.validMoves();
+            if (availableMoves.isEmpty()) {
+                if (humancount > cpu) {
+                    JOptionPane.showMessageDialog(panel, "YOU WIN!", "Result", JOptionPane.INFORMATION_MESSAGE);
+                } else if (cpu > humancount) {
+                    JOptionPane.showMessageDialog(panel, "YOU LOSE!", "Result", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(panel, "DRAW!", "Result", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
         }
     }
