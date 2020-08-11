@@ -1,32 +1,176 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.company;
 import com.company.Reversi;
 import com.company.PureMCTS;
 
-import java.awt.Point;
+import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+import java.awt.Point;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import java.time.Instant;
 import java.time.Duration;
 
-/**
- *
- * @author gerlandl
- */
-public class Main {
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) throws InterruptedException {
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
+public class Main extends JPanel implements MouseListener{
+    static int gameSizeInt = 8;
+    static JPanel panel = new JPanel() ;
+    static int humancount = 2;
+    static int cpu = 2;
+    static int fontX = 10;
+    static int fontY = 498;
+    static int[] move = {0, 0};
+    static Point nextMove = new Point(0,0);
+    static ArrayList<Point> availableMoves = new ArrayList<Point>();
+    static Reversi game = new Reversi();
+    static boolean playerturn = false;
+    static boolean acceptedMove;
+    static boolean skippedMove = false;
+    static int human = 1;
+    static PureMCTS AI;
+    static Point AI_Move;
+    static int[] AI_wins;
+    static final int PLAYOUTS = 500;
+    static int AINum =2;
+    static int[][] boardValues;
+    static boolean playCorner;
+    static AtomicInteger wins;
+    static final ArrayList<Point> corners = new ArrayList<Point>();
+    static List<Thread> threadList;
+    static final int MCTS_PLAYOUTS = 10000;
+    static int lowest = -1500;
+    static boolean PureMCTSAI = true;
+
+    public Main() {
+
+        // Window Properties
+        JFrame frame = new JFrame();
+        frame.setTitle("Reversi");
+        frame.setLocationRelativeTo(null);
+        frame.setLocation(450, 150);
+        panel.setPreferredSize(new Dimension(361, 385));
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
+        frame.getContentPane().setBackground( new Color(18, 199, 24));
+
+        // JMenuBar
+        JMenuBar menuBar = new JMenuBar();
+        JMenu file = new JMenu("File");
+        JMenuItem newGame = new JMenuItem("New Game");
+        JCheckBoxMenuItem help = new JCheckBoxMenuItem("Enable Help");
+        JMenuItem exitGame = new JMenuItem("Close Game");
+        menuBar.add(file);
+        file.add(newGame);
+        file.add(help);
+        help.setSelected(true);
+        file.addSeparator();
+        file.add(exitGame);
+        newGame.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                startGame();
+                panel.repaint();
+            }
+
+        });
+        help.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                panel.repaint();
+            }
+
+        });
+        exitGame.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+
+        });
+
+        panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                for (int i = 0; i < gameSizeInt; i++)
+                    for (int j = 0; j < gameSizeInt; j++) {
+                        g.setColor(new Color(18, 199, 24));
+                        g.fillRect( j * 60,   i * 60, 60, 60);
+                        g.setColor(Color.black);
+                        g.drawRect( j * 60,  i * 60, 60, 60);
+                    }
+                for(int i = 0 ;i < 8;i++){
+                    for(int j = 0 ;j < 8;j++){
+                        switch (game.pieceAt(j,i)) {
+                            case 0:   break;
+
+                            case 1:
+                                g.setColor(Color.BLACK);
+                                g.fillOval(5+i * 60, 5+j * 60, 50, 50);
+                                break;
+                            case 2:
+                                g.setColor(Color.WHITE);
+                                g.fillOval(5+i * 60, 5+j * 60, 50, 50);
+                                break;
+                            case -1:
+                                if(help.getState()){
+                                    g.setColor(Color.BLUE);
+                                    g.fillOval(20+i * 60, 20+j * 60, 25, 25);
+                                }
+                                break;
+
+                        }
+                    }
+                }
+                if(help.getState()) {
+                    availableMoves = game.validMoves();
+                    for (int i = 0; i < availableMoves.size(); i++) {
+                        Point curr = availableMoves.get(i);
+                        g.setColor(Color.BLUE);
+                        g.fillOval(20 + curr.x * 60, 20 + curr.y * 60, 25, 25);
+                    }
+                }
+                g.setColor(Color.BLACK);
+                g.setFont(new Font ("Courier New", Font.BOLD, 15));
+                if (human == 1) {
+                    g.drawString("Black = " + humancount + "  White = " + cpu + "                   You are Black", fontX, fontY);
+                } else if (human == 2){
+                    g.drawString("Black = " + humancount + "  White = " + cpu + "                   You are White", fontX, fontY);
+                }
+            }
+        };
+
+        frame.add(panel);
+        frame.setLocation(390, 80);
+        frame.setPreferredSize(new Dimension(497, 567));
+        frame.setSize(487, 536);
+        frame.setJMenuBar(menuBar);
+        panel.addMouseListener(this);
+        frame.pack();
+        // Display frame after all components added
+        frame.setVisible(true);
+        System.out.println("DRAW BOARD");
+    }
+
+    public static void AIvAI() {
         final int MCTS_PLAYOUTS = 10000;
-        final int NUMBER_OF_GAMES = 100;
+        final int NUMBER_OF_GAMES = 1;
         final ArrayList<Point> corners = new ArrayList<Point>();
         corners.add(new Point(0,0));
         corners.add(new Point(0,7));
@@ -126,51 +270,6 @@ public class Main {
             }
 
             while (true) {
-                /*whosTurn(game, human);
-                printBoard(game);
-                if (availableMoves.isEmpty()) {
-                    if (skippedMove) {
-                        System.out.println("No move available! Ending game.");
-                        break;
-                    }
-                    System.out.println("No move available! Skipping turn.");
-                    game.forceSkipMove();
-                    availableMoves = game.validMoves();
-                    skippedMove = true;
-                } else {
-                    while (true) {
-                        acceptedMove = false;
-                        System.out.println("Please type the Y Coordinate of your next move");
-                        int number = input.nextInt();
-                        if (number >= 0 && number < 8) {
-                            move[0] = number;
-                        }
-                        System.out.println("Please type the X Coordinate of your next move");
-                        number = input.nextInt();
-                        if (number >= 0 && number < 8) {
-                            move[1] = number;
-                        }
-                        nextMove.setLocation(move[1], move[0]);
-                        for (final Point validMove : availableMoves) {
-                            if (nextMove.equals(validMove)) {
-                                skippedMove = false;
-                                game.makeMove(move[0], move[1]);
-                                availableMoves = game.validMoves();
-                                acceptedMove = true;
-                                printBoard(game);
-                                System.out.println("Waiting for AI's move...");
-                                break;
-                            }
-                        }
-                        if (!acceptedMove) {
-                            System.out.println("Invalid move");
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                // Human move accepted or skipped, now is AI's turn.*/
-
                 // ImprovedAI Move.
                 System.out.println("Improved Heuristics Move");
                 printBoard(game);
@@ -223,8 +322,8 @@ public class Main {
                     updateHeuristicBoard(boardValues, AI_Move, true);
                     Heuristics_moves++;
                     skippedMove = false;
-
                 }
+
                 availableMoves = game.validMoves();
                 System.out.println("Pure MCTS Move");
                 printBoard(game);
@@ -323,6 +422,27 @@ public class Main {
 
     }
 
+
+    public static void main(String[] args) throws InterruptedException {
+        Scanner input = new Scanner(System.in);
+        if (args.length != 0){
+            // Begin AIvAI if command args is present
+            if (args[0].equals("AI")){
+                AIvAI();
+            }
+        } else {
+            chooseAI();
+            startGame();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    new Main();
+                }
+            });
+        }
+    }
+
+
     public static void printBoard(Reversi game){
         int piece;
         System.out.println("   0 | 1 | 2 | 3 | 4 | 5 | 6 | 7  ");
@@ -337,6 +457,7 @@ public class Main {
                 }
                 else if (piece == 1){
                     System.out.print(" X |");
+
                 }
                 else if (piece == 2){
                     System.out.print(" O |");
@@ -371,6 +492,158 @@ public class Main {
         System.out.println("CPU: " + scores[1] + "\n");
     }
 
+
+    public static void chooseAI(){
+//        game.newGame();
+//        availableMoves = game.validMoves();
+//        skippedMove = false;
+        JPanel popup = new JPanel();
+        popup.add(new JLabel("Play against Pure MCTS or Heuristic"));
+        Object[] options = { "Pure MCTS", "Heuristic"};
+        int result = JOptionPane.showOptionDialog(null, popup, "Mode Selection",
+                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+                null, options, null);
+        if (result == JOptionPane.NO_OPTION) {
+            System.out.println("Heuristic");
+            PureMCTSAI = false;
+            corners.add(new Point(0,0));
+            corners.add(new Point(0,7));
+            corners.add(new Point(7,0));
+            corners.add(new Point(7,7));
+            boardValues = new int[][]{
+                    {1000, lowest, 1000, 1000, 1000, 1000, lowest, 1000},
+                    {lowest, lowest, 0, 0, 0, 0, lowest, lowest},
+                    {1000, 0, 0, 0, 0, 0, 0, 1000},
+                    {1000, 0, 0, 0, 0, 0, 0, 1000},
+                    {1000, 0, 0, 0, 0, 0, 0, 1000},
+                    {1000, 0, 0, 0, 0, 0, 0, 1000},
+                    {lowest, lowest, 0, 0, 0, 0, lowest, lowest},
+                    {1000, lowest, 1000, 1000, 1000, 1000, lowest, 1000}};
+        } else if (result == JOptionPane.YES_OPTION) {
+            System.out.println("Pure MCTS");
+        }
+    }
+
+    public static void startGame(){
+//        game.newGame();
+        skippedMove = false;
+        JPanel popup = new JPanel();
+        popup.add(new JLabel("Player goes first?"));
+        Object[] options = { "Yes", "No"};
+        int result;
+        //Makes sure user selects something
+        do{
+            result = JOptionPane.showOptionDialog(null, popup, "Who goes first?",
+                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+                    null, options, null);
+        } while (result == JOptionPane.CLOSED_OPTION);
+        if (result == JOptionPane.NO_OPTION) {
+            human = 2;
+            AINum = 1;
+            game.newGame(AINum);
+            availableMoves = game.validMoves();
+            if (PureMCTSAI) {
+                PureMCTSMove();
+            } else {
+                heuristicMove();
+            }
+        } else if (result == JOptionPane.YES_OPTION) {
+            human = 1;
+            AINum = 2;
+            game.newGame(human);
+            availableMoves = game.validMoves();
+            playerturn = true;
+        }
+    }
+
+
+    public static void count(Reversi game){
+        int[] scores = game.scores();
+        humancount = scores[0];
+        cpu = scores[1];
+        if ((humancount + cpu) == 64){
+            if (humancount > cpu){
+                JOptionPane.showMessageDialog(panel, "YOU WIN!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+            else if (cpu > humancount){
+                JOptionPane.showMessageDialog(panel, "YOU LOSE!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+            else{
+                JOptionPane.showMessageDialog(panel, "DRAW!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } else if (availableMoves.isEmpty()){
+            if (humancount > cpu){
+                JOptionPane.showMessageDialog(panel, "YOU WIN!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+            else if (cpu > humancount){
+                JOptionPane.showMessageDialog(panel, "YOU LOSE!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+            else{
+                JOptionPane.showMessageDialog(panel, "DRAW!", "Result",JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }
+
+
+    public static void heuristicMove(){
+        System.out.println("Improved Heuristics Move");
+        printBoard(game);
+        availableMoves = game.validMoves();
+        playCorner = false;
+        AI_Move = availableMoves.get(0);
+        AI_wins = new int[availableMoves.size()];
+        for (int n = 0; n < availableMoves.size(); n++) {
+            AI_Move = availableMoves.get(n);
+            int scale = boardValues[(int)AI_Move.getY()][(int)AI_Move.getX()];
+            AI_wins[n] = scale;
+            wins = new AtomicInteger(0);
+            if (corners.contains(AI_Move)){
+                // Play the corner. Skip other possible moves.
+                playCorner = true;
+                break;
+            }
+            threadList = new ArrayList<Thread>();
+            for (int i = 0; i < MCTS_PLAYOUTS; i++) {
+                AI = new PureMCTS(game);
+                AI_wins[n] += AI.randomPlayout(AI_Move, human);
+            }
+        }
+        if (!playCorner) {
+            int largest = 0;
+            for (int i = 1; i < AI_wins.length; i++) {
+                if (AI_wins[i] > AI_wins[largest]) {
+                    largest = i;
+                }
+            }
+            AI_Move = availableMoves.get(largest);
+        }
+        game.makeMove(AI_Move.y, AI_Move.x);
+        updateHeuristicBoard(boardValues, AI_Move, true);
+    }
+
+    public static void PureMCTSMove (){
+        AI_wins = new int[availableMoves.size()];
+        for (int n = 0; n < availableMoves.size(); n++) {
+            AI_Move = availableMoves.get(n);
+            for (int z = 0; z < PLAYOUTS; z++) {
+                AI = new PureMCTS(game);
+                AI_wins[n] += AI.randomPlayout(AI_Move, AINum);
+            }
+        }
+        int largest = 0;
+        for (int z = 1; z < AI_wins.length; z++) {
+            if (AI_wins[z] > AI_wins[largest]) {
+                largest = z;
+            }
+        }
+        // Do move:
+        AI_Move = availableMoves.get(largest);
+        game.makeMove(AI_Move.y, AI_Move.x);
+        availableMoves = game.validMoves();
+
+    }
+
     public static void whosTurn(Reversi game, int human){
         if (game.current_Move == human){
             System.out.println("Human move");
@@ -378,6 +651,68 @@ public class Main {
         else {
             System.out.println("CPU move");
         }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent arg0) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        acceptedMove = false;
+        int x, y, i = 0, j = 0;
+        x = e.getX();
+        y = e.getY();
+        i = x/60;
+        j = y/60;
+        System.out.println(j);
+        System.out.println(i);
+        nextMove.setLocation(i, j);
+        System.out.println(nextMove);
+        availableMoves = game.validMoves();
+        for (final Point validMove : availableMoves) {
+            if (nextMove.equals(validMove)) {
+                System.out.println("VALID MOVE");
+                move[0] = j;
+                move[1] = i;
+                System.out.println(move);
+                playerturn = true;
+                System.out.println(playerturn);
+                skippedMove = false;
+                game.makeMove(move[0], move[1]);
+                System.out.println("MOVE MADE");
+                availableMoves = game.validMoves();
+                acceptedMove = true;
+            }
+        }
+        panel.repaint();
+        if (acceptedMove) {
+            if (availableMoves.isEmpty()) {
+                if (skippedMove) {
+                    System.out.println("No move available! Ending game.");
+                }
+                System.out.println("No move available! Skipping turn.");
+                game.forceSkipMove();
+                availableMoves = game.validMoves();
+                skippedMove = true;
+            } else {
+                if (PureMCTSAI) {
+                    PureMCTSMove();
+                } else {
+                    heuristicMove();
+                }
+                panel.repaint();
+            }
+        }
+        printBoard(game);
+        panel.repaint();
+        count(game);
     }
 
     public static void updateHeuristicBoard (int[][] board, Point move, boolean heuristic){
@@ -448,5 +783,16 @@ public class Main {
                 }
             }
         }
+    }
+
+
+    @Override
+    public void mousePressed(MouseEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent arg0) {
+        // TODO Auto-generated method stub
     }
 }
