@@ -149,9 +149,9 @@ public class Main extends JPanel implements MouseListener{
                 g.setColor(Color.BLACK);
                 g.setFont(new Font ("Courier New", Font.BOLD, 15));
                 if (human == 1) {
-                    g.drawString("Black = " + humancount + "  White = " + cpu + "                   You are Black", fontX, fontY);
+                    g.drawString("Black = " + humancount + "  White = " + cpu + "                You are Black", fontX, fontY);
                 } else if (human == 2){
-                    g.drawString("Black = " + humancount + "  White = " + cpu + "                   You are White", fontX, fontY);
+                    g.drawString("Black = " + humancount + "  White = " + cpu + "                You are White", fontX, fontY);
                 }
             }
         };
